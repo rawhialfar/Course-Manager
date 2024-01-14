@@ -1,0 +1,320 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Trebuchet MS", sans-serif;
+    color: #fdfdfd;
+    text-decoration: none;
+    max-width: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: black;
+}
+
+.navbarContainer {
+    height: 100px;
+}
+
+.navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: inherit;
+    width: 85%;
+    margin: 0 auto;
+}
+
+.header {
+    font-size: 3.5rem;
+}
+
+.logo {
+    transition: all 150ms ease-in-out;
+    position: absolute;
+    top: 12.5px; /* Adjust the top position as needed */
+    left: -42px; /* Adjust the left position for top-left corner */
+    width: 238px; /* Adjust the width of the logo as needed */
+    text-shadow: 5px 5px 8px rgba(0, 0, 0, 5);
+}
+
+.section {
+    width: 80%;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button,
+input[type="submit"],
+input[type="reset"] {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+.button {
+    height: 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 0 15px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 3px;
+    color: black;
+    transition: all 0.1s ease-in;
+}
+
+.button:hover {
+    background-color: grey;
+}
+
+input {
+    all: unset;
+    background-color: white;
+    border-radius: 5px;
+    height: 40px;
+    width: 300px;
+    margin: 15px 5px;
+    text-align: center;
+    color: black;
+}
+
+.section > h2 {
+    margin: 10px 0;
+}
+
+.resultsContainer {
+    height: 400px;
+    width: 100%;
+    margin: 10px 0;
+    max-height: 0;
+    transition: max-height 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.resultsContainerHeader {
+    height: 40px;
+    width: 100%;
+    margin: 10px 0;
+    position: relative;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.collapseButton {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(-50%, -50%);
+}
+.availableCourses {
+    display: flex;
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    align-items: center;
+    overflow-x: scroll;
+    height: 100%;
+    width: 100%;
+}
+
+.availableCourses > h2 {
+    text-align: center;
+}
+
+.course {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-y: scroll;
+    padding: 15px;
+    height: 95%;
+    width: 25%;
+    border-radius: 10px;
+    margin: 0 10px;
+    background-color: #c20431;
+    scrollbar-width: none; /* Firefox */
+}
+
+.course::-webkit-scrollbar {
+    display: none;
+}
+
+.courseDescription {
+    padding: 5px;
+}
+
+#searchCourseCodeData {
+    height: 100%;
+    width: 100%;
+    background-color: #c20431;
+    overflow-x: scroll;
+    border-radius: 10px;
+}
+
+.searchCourseFlexContainer {
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.innerContainer1 {
+    height: 100%;
+    width: 60%;
+    padding: 10px;
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+}
+
+.innerContainer1::-webkit-scrollbar {
+    display: none;
+}
+.innerContainer2 {
+    height: 100%;
+    width: 40%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+    flex-direction: column;
+}
+
+.innerContainer2::-webkit-scrollbar {
+    display: none;
+}
+
+.searchCourseTitle {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.searchCourseDescription {
+    font-size: 1.1rem;
+}
+
+.searchCourseCredit {
+    text-align: center;
+    padding: 15px;
+}
+
+@media screen and (max-width: 1280px) {
+    header {
+        z-index: 1;
+        position: sticky;
+        top: 0;
+        text-align: right;
+        transition: all 150ms ease-in-out;
+    }
+    h4 {
+        max-width: 200px;
+        transition: all 150ms ease-in-out;
+    }
+
+    .logo {
+        position: relative;
+        top: 0;
+        left: 0;
+        transition: all 150ms ease-in-out;
+        width: 350px; /* Make the logo fill the width of its container */
+    }
+    .section {
+        width: 95%;
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .section-sp {
+        font-size: 2.5rem;
+    }
+    .resultsContainer {
+        height: 400px;
+        width: 90%;
+        margin: 10px 0;
+        max-height: 0;
+        transition: max-height 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    .inputDiv {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        display: none;
+    }
+
+    input {
+        font-size: 1.75rem;
+        height: 100px;
+        width: 80%;
+        margin: 15px 5px;
+        text-align: center;
+        color: black;
+    }
+
+    .section-sp {
+        font-size: 3.5rem;
+    }
+
+    .resultsContainerHeader {
+        height: 110px;
+    }
+
+    .resultsContainerHeader h2 {
+        font-size: 3rem;
+    }
+
+    .navbarContainer {
+        height: 200px;
+    }
+
+    .button {
+        font-size: 1.75rem;
+        height: 80px;
+    }
+
+    .collapseButton {
+        right: -30px;
+    }
+
+    .course {
+        width: 35%;
+    }
+
+    .courseTitle {
+        font-size: 2rem;
+    }
+
+    .courseDescription {
+        font-size: 1.5rem;
+    }
+
+    .searchCourseTitle {
+        font-size: 3rem;
+    }
+
+    .searchCourseDescription {
+        font-size: 1.5rem;
+    }
+
+    .searchCourseCredit {
+        font-size: 1.75rem;
+    }
+
+    .availableCourses > div > h2 {
+        font-size: 2.5rem;
+    }
+}
