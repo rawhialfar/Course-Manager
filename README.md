@@ -1,4 +1,4 @@
-download nginx and php7.4-fpm on a local environment
+download nginx and php7.4-fpm on a local environment:
 sudo apt install php7.4-fpm
 sudo apt install nginx
 sudo apt install nginx
