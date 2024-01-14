@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Course Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="src/js/loader.js"></script>
+    <link rel="shortcut icon" type="image/svg" href="src/img/logo.png" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+    <link rel="stylesheet" type="text/css" href="src/style/Course_Tree.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        #modalText {
+            color: black;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            padding: 10px;
+            right: 0;
+            top: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbarContainer">
+        <div class="navbar">
+            <a href="https://cis3760f23-08.socs.uoguelph.ca/" class="logoAnchor"
+                style="height: 100%; display: flex; align-items: center">
+                <img class="logo" src="src/img/logo.svg" />
+            </a>
+            <h1 class="header">Courses Tree</h1>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1 class="section-sp">Course Code Search</h1>
+        <input type="text" id="searchCourseCodeInput" placeholder="Enter course code" />
+        <button class="button" id="searchCourseCodeButton">Search</button>
+        <div class="resultsContainerHeader">
+            <h2>Course Tree</h2>
+
+        </div>
+        <div class="resultsContainer" id="searchCourseCodeContainer">
+            <div id="searchCourseCodeData">
+                <div class="searchCourseFlexContainer">
+                    <div class="innerContainer2">
+                        <h2 class="searchCourseCredit">
+                            Prerequisites: prerequisites
+                        </h2>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="resultsContainer" id="availableCoursesContainer">
+            <div class="availableCourses" id="availableCourses"></div>
+        </div>
+    </div>
+
+    <div id="mynetwork"></div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalText"></p>
+        </div>
+    </div>
+</body>
+<script>
+
+
+    async function getCourseCode(searchQuery) {
+        data = {
+            action: "getSubjects",
+            body: searchQuery,
+        };
+
+        return await getCourseData(data);
+    }
+
+    async function getPrerequisites(searchQuery) {
+        data = {
+            action: "getPrerequisites",
+            body: searchQuery,
+        };
+
+        return await getCourseData(data);
+    }
+    async function getCourseData(apiRequestUrl) {
+        url = "https://cis3760f23-08.socs.uoguelph.ca/api";
+        data =
+            "action=" +
+            apiRequestUrl.action +
+            "&" +
+            apiRequestUrl.action +
+            "=" +
+            apiRequestUrl.body;
+
+        return await fetch(url, {
+            method: "POST",
+            body: data,
+        })
+            .then(response => response.json())
+            .catch(error => {
+                error => undefined
+                //console.log("Error fetching data:", error);
+            });
+    }
+    
+    
+    async function generateEdges(courseList, nodes) {
+        let edges = [];
+        let groupColors = {};
+
+        for (const [courses, prereqs] of Object.entries(courseList)) {
+            for (const prereq of prereqs) {
+                // Remove brackets and replace or with comma
+                const cleanedPrereq = prereq.replace(/[\[\]\(\)]/g, '').replace(/ or /g, ',');
+                // Ignore prerequisites with credits
+                if (cleanedPrereq.includes('credits')) {
+                    continue;
+                }
+
+                // Split on commas and remove leading/trailing spaces
+                const edgeList = cleanedPrereq.split(',').map(item => item.trim());
+
+                for (const course of edgeList) {
+                    let from, to, color;
+                    // Extract course code and id with an asterisk
+                    const match = course.match(/([A-Za-z]+\*)?(\d{4})/);
+
+                    if (!match) {
+                        continue;
+                    }
+
+                    const [, courseCode, courseId] = match;
+                    // Find node with matching course code and 4-digit id
+                    let existingNode = nodes.find(node => node.id === parseInt(courseId) && node.label.startsWith(courseCode));
+
+                    // If an exact match is not found, find the node with matching course code and closest 4-digit id
+                    if (!existingNode) {
+                        let closestIdNode = nodes
+                            .filter(node => node.label.startsWith(courseCode))
+
+                        if (closestIdNode.length > 0) {
+                            closestIdNode = closestIdNode.reduce((prev, curr) => {
+                                return Math.abs(curr.id - parseInt(courseId)) < Math.abs(prev.id - parseInt(courseId)) ? curr : prev;
+                            });
+                        }
+
+                        existingNode = closestIdNode;
+                    }
+
+                    const existingNodeId = nodes.findIndex(node => node.id === parseInt(courseId));
+                    const existingLabel = nodes.findIndex(node => node.label === courseCode + courseId);
+                    
+                    // Check if the node already exists with the courseId and courseCode
+                    if (existingNodeId !== -1) {
+                        to = existingNode.id;
+                    } else {
+                        if (existingLabel === -1) {
+                            to = parseInt(courseId);
+                            nodes.push({ id: to, label: courseCode + courseId });
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    from = courses.replace(/^\D+/g, '');
+                    
+                    // Check if the group has been assigned a color, if not, assign a new color
+                    if (!groupColors[prereq]) {
+                        groupColors[prereq] = getNextColor(); // Implement getNextColor() to get the next color
+                    }
+
+                    if (!(prereq.includes('or') || prereq.includes('of'))) {
+                        color = 'lightgrey';
+                    } else {
+                        color = groupColors[prereq];
+                    }
+                    // Create edge data and add to the array
+                    const edgeData = { from, to, color: { color } };
+                    edges.push(edgeData);
+                }
+            }
+        }
+        return await generateGraph(courseList, nodes, edges);
+    }
+
+    function getNextColor() {
+        const colorSet = ['cyan', 'red', 'green', 'yellow', 'orange'];
+        if (!getNextColor.index || getNextColor.index >= colorSet.length) {
+            getNextColor.index = 0;
+        }
+        const nextColor = colorSet[getNextColor.index];
+        getNextColor.index++;
+        return nextColor;
+    }
+
+    async function nodes(list) {
+        let outputArray = [];
+
+        for (let course in list) {
+            if (list.hasOwnProperty(course)) {
+                let courseId = parseInt(course.match(/\d+/)[0]); // Extract numeric part of the course ID
+                outputArray.push({ id: courseId, label: course });
+            }
+        }
+        // const nodes = [
+        //     { id: 3760, label: 'CIS*3760' },
+        //     { id: 2750, label: 'CIS*2750' },
+        //     { id: 2430, label: 'CIS*2430' },
+        //     { id: 1420, label: 'ENGG*1420' },
+        //     { id: 2520, label: 'CIS*2520' },
+        //     { id: 3750, label: 'CIS*3750' },
+        //     { id: 1910, label: 'CIS*1910' },
+        //     { id: 1500, label: 'ENGG*1500' },
+        //     { id: 2000, label: 'CIS*2000' },
+        //     { id: 2001, label: 'MATH*2000' },
+        //     { id: 2500, label: 'CIS*2500' }
+        // ];
+
+        return await generateEdges(list, outputArray)
+
+    }
+
+    async function generateGraph(list, nodes, edges) {
+        // const elementDiv = document.getElementById(
+        //     "searchCourseCodeContainer"
+        // );
+        // elementDiv.style.maxHeight = "400px";
+        const container = document.getElementById('mynetwork');
+        console.log(nodes.length)
+        const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+        const options = {
+            nodes: {
+                font: {
+                    size: 25
+                },
+                color: {
+                    border: '#ffffff',
+                    background: '#ffffff',
+                    border: '#000000',
+                    highlight: {
+                        border: '#2B7CE9',
+                        background: '#D2E5FF'
+                    }
+                }
+            },
+            layout: {
+                hierarchical: {
+                    direction: "DU",
+                    sortMethod: "directed",
+                },
+            },
+            edges: {
+                arrows: {
+                    from: {
+                        enabled: true,
+                        scaleFactor: 1,
+                        type: "arrow"
+                    },
+                }
+            },
+            physics: {
+                hierarchicalRepulsion: {
+                    nodeDistance: nodes.length > 40 ? 230 : 180,
+                },
+
+            }
+        };
+        const network = new vis.Network(container, data, options);
+
+        network.on('click', function (data) {
+            let id = data.nodes;
+            id = id[0]
+            course = nodes.filter(n => n.id == (id))
+            course = course[0]
+
+
+            let node_label = course.label
+            if (node_label != undefined) {
+
+                console.log(list[node_label])
+                let modalText = '';
+                let i = 1;
+                course_prereqs = list[node_label];
+                course_prereqs.forEach(element => {
+                    modalText += 'Prerequisite ' + i + ': ' + element + '<br>';
+                    i += 1;
+                });
+
+                if (modalText === '') {
+                    modalText = 'No prerequisites';
+                }
+
+                document.getElementById('modalText').innerHTML = modalText;
+                document.getElementById('myModal').style.display = "block";
+
+            }
+        });
+
+    }
+
+    //let prereqComplete = {};
+    async function cleanTree(prereqComplete) {
+        // Clean up the input
+        let cleanedInput = {};
+        for (let key in prereqComplete) {
+            let value = prereqComplete[key];
+            if (typeof value === "string") {
+                value = value.split(",").map(course => course.trim());
+            }
+            cleanedInput[key] = value;
+        }
+
+        // Process each prerequisite to add an edge for each course
+        let cleanedOutput = {};
+        for (let key in cleanedInput) {
+            let prerequisites = cleanedInput[key];
+            cleanedOutput[key] = [];
+
+            for (let i = 0; i < prerequisites.length; i++) {
+                let prerequisite = prerequisites[i];
+                if (prerequisite.startsWith("(")) {
+                    // Handle courses with alternatives
+                    let alternatives = prerequisite.slice(1, -1).split(" or ");
+                    cleanedOutput[key] = cleanedOutput[key].concat(alternatives.map(course => course.trim()));
+                } else {
+                    cleanedOutput[key].push(prerequisite);
+                }
+            }
+        }
+        document.getElementById("searchCourseCodeData").innerHTML += `
+                <div class="searchCourseFlexContainer">
+                    <div class="innerContainer2">
+                        <h2 class="searchCourseCredit">Prerequisites Complete: ${JSON.stringify(cleanedOutput)}</h2>
+                    </div>
+                </div>
+            `;
+    }
+    function getPrereqTree(courseCode) {
+        getCourseCode(courseCode).then(data => {
+            if (data && Object.keys(data).length) {
+                let prerequisiteString = "";
+
+                getPrerequisites(courseCode).then(prerequisites => {
+                    prereqComplete[courseCode] = [];
+
+                    const array = [];
+                    if (prerequisites != undefined) {
+                        for (const prerequisite of prerequisites) {
+                            array.push(prerequisite.prerequisite);
+                            getPrereqTree(prerequisite.prerequisite);
+                        }
+                    }
+                    prereqComplete[courseCode] = array;
+
+
+                    const elementDiv = document.getElementById("searchCourseCodeContainer");
+                    elementDiv.style.maxHeight = "400px";
+
+                    cleanTree(prereqComplete);
+
+                });
+            }
+        });
+    }
+
+
+    document.getElementById("searchCourseCodeButton")
+        .addEventListener("click", () => {
+
+            const button = document.getElementById(
+                "searchCourseCodeCollapseButton"
+            );
+            document.getElementById(
+                "searchCourseCodeContainer"
+            ).style.maxHeight = null;
+            document.getElementById("searchCourseCodeData").innerHTML = "";
+            courseCodeString = document.getElementById(
+                "searchCourseCodeInput"
+            ).value;
+
+            getCourseCode(courseCodeString).then(data => {
+                if (data && Object.keys(data).length) {
+                    let prerequisiteString = ''
+
+
+                    for (course of data) {
+                        prerequisiteString = prerequisiteString + course.courseID + ','
+                    }
+                    prerequisiteString = prerequisiteString.slice(0, -1)
+
+                    getPrerequisites(prerequisiteString).then(prerequisites => {
+                        let list = {}
+
+                        for (prerequisite of prerequisites) {
+                            if (typeof list[prerequisite.courseID] === 'undefined') {
+                                let arr = []
+                                arr.push(prerequisite.prerequisite)
+                                list[prerequisite.courseID] = arr
+                            }
+                            else {
+                                list[prerequisite.courseID].push(prerequisite.prerequisite)
+
+                            }
+
+                        }
+
+                        //attached courses with no prerqs 
+                        for (course of data) {
+                            if (typeof list[course.courseID] === 'undefined') {
+                                let arr = []
+                                list[course.courseID] = arr
+                            }
+                        }
+                        // console.log(list)
+
+                        //nodes = call nodes function 
+                        nodes(list)
+
+                    })
+                }
+            });
+        });
+
+
+    // When the user clicks on <span> (x), close the modal
+    document.getElementsByClassName("close")[0].onclick = function () {
+        document.getElementById('myModal').style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == document.getElementById('myModal')) {
+            document.getElementById('myModal').style.display = "none";
+        }
+    }
+
+
+
+
+</script>
+
+</html>

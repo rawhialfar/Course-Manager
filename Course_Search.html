@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Course Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="src/js/loader.js"></script>
+    <link rel="stylesheet" type="text/css" href="src/style/course_search.css" />
+    <link rel="shortcut icon" type="image/svg" href="src/img/logo.png" />
+</head>
+
+<body>
+    <div class="navbarContainer">
+        <div class="navbar">
+            <a href="https://cis3760f23-08.socs.uoguelph.ca/" class="logoAnchor"
+                style="height: 100%; display: flex; align-items: center">
+                <img class="logo" src="src/img/logo.svg" />
+            </a>
+            <h1 class="header">Course Search</h1>
+        </div>
+    </div>
+    <div class="section">
+        <h1 class="section-sp">Future Courses Search</h1>
+        <input type="text" id="searchPrerqs" placeholder="Enter course prerequisites" />
+        <button class="button" id="searchPrereqsButton">Search</button>
+        <div class="resultsContainerHeader">
+            <h2>List of available courses</h2>
+            <button class="collapseButton button" id="availableCoursesButton"
+                onclick="toggleButton('availableCoursesButton')">
+                Expand
+            </button>
+        </div>
+        <div class="resultsContainer" id="availableCoursesContainer">
+            <div class="availableCourses" id="availableCourses"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1 class="section-sp">Semester Search</h1>
+        <div class="inputDiv">
+            <input type="text" id="specificSubject" placeholder="Enter for specific subject" />
+            <input type="text" id="searchSemester" placeholder="Enter Semester" />
+        </div>
+        <button class="button" id="searchSemesterButton">Search</button>
+        <div class="resultsContainerHeader">
+            <h2>List of available courses</h2>
+            <button class="collapseButton button" id="searchSemesterCollapseButton"
+                onclick="toggleButton('searchSemesterCollapseButton')">
+                Expand
+            </button>
+        </div>
+        <div class="resultsContainer" id="semesterSearchContainer">
+            <div class="availableCourses" id="semesterSearch"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1 class="section-sp">Course Code Search</h1>
+        <input type="text" id="searchCourseCodeInput" placeholder="Enter course code" />
+        <button class="button" id="searchCourseCodeButton">Search</button>
+        <div class="resultsContainerHeader">
+            <h2>Details of Course</h2>
+            <button class="collapseButton button" id="searchCourseCodeCollapseButton"
+                onclick="toggleButton('searchCourseCodeCollapseButton')">
+                Expand
+            </button>
+        </div>
+        <div class="resultsContainer" id="searchCourseCodeContainer">
+            <div id="searchCourseCodeData">
+                <div class="searchCourseFlexContainer">
+                    <div class="innerContainer1">
+                        <h1 class="searchCourseTitle">coursename</h1>
+                        <p class="searchCourseDescription">description</p>
+                    </div>
+                    <div class="innerContainer2">
+                        <h2 class="searchCourseCredit">Total Credits: credits</h2>
+                        <h2 class="searchCourseCredit">
+                            Prerequisites: prerequisites
+                        </h2>
+                        <h2 class="searchCourseCredit">
+                            Restrictions: restrictions
+                        </h2>
+                        <h2 class="searchCourseCredit">Offering: offering</h2>
+                        <h2 class="searchCourseCredit">Department: department</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1 class="section-sp">Optimal Path Search</h1>
+        <input type="text" id="optimalPathInput" placeholder="Enter course for optimal path" />
+        <button class="button" id="optimalPathButton">Find Optimal Path</button>
+        <div class="resultsContainerHeader">
+            <h2>Optimal Path</h2>
+            <button class="collapseButton button" id="optimalPathCollapseButton"
+                onclick="toggleButton('optimalPathCollapseButton')">
+                Expand
+            </button>
+        </div>
+        <div class="resultsContainer" id="optimalPathContainer">
+            <div id="optimalPathData"></div>
+        </div>
+    </div>
+
+    <script>
+        //=============================================
+        //FOLLOWING TWO FUNCTIONS THAT DOES THE WORK
+        //============================================
+        async function createTreeList(courses, list) {
+            let courseString = ''
+            let newCourses = ''
+
+            if (courses == '') {
+                return await list
+            }
+
+
+            return await getPrerequisites(courses).then(prerequisites => {
+
+
+                if (prerequisites) {
+
+                    for (prerequisite of prerequisites) {
+
+                        // Ignore prerequisites with credits
+                        //if (prerequisite.prerequisite.includes('credits'))
+                        //  continue;
+
+                        // Remove brackets and replace or with comma
+                        courseString = prerequisite.prerequisite
+                        courseString = courseString.replace(/[\[\]\(\)]/g, '').replace(/ or /g, ',');
+                        //courseString = courseString.replace(/[1-9] of/g, '');
+                        courseString = courseString.trim()
+
+                        newCourses = newCourses + courseString + ','
+
+                        if (typeof list[prerequisite.courseID] === 'undefined') {
+                            let arr = []
+                            arr.push(prerequisite.prerequisite)
+                            list[prerequisite.courseID] = arr
+                        }
+                        else {
+                            if (!list[prerequisite.courseID].includes(prerequisite.prerequisite))
+                                list[prerequisite.courseID].push(prerequisite.prerequisite)
+
+                        }
+
+
+
+                    }
+                }
+
+                newCourses = newCourses.slice(0, -1)
+                return createTreeList(newCourses, list)
+                //console.log(list)
+
+            })
+
+
+
+        }
+
+        function cleanTree(list) {
+            for (let node in list) {
+                for (let i = 0; i < list[node].length; i++) {
+
+                    let course = list[node][i];
+
+                    course = course.replace(/[\[\]\(\)]/g, '').replace(/ or /g, ',');
+                    if (course.includes(",") && !course.includes("of")) {
+                        course = "1 of " + course;
+                    }
+                    //course = course.replace(/[1-9] of/g, '');
+                    course = course.trim()
+                    list[node][i] = course;
+
+                }
+            }
+            return list;
+        }
+
+        async function createTree(node, list, tree) {
+            arr = []
+            let bottom_of_tree = false;
+            let newNodes = ''
+
+            split_node = node.split(",").map(n => n.trim());
+
+            // Remove brackets and replace or with comma
+            for (single_node of split_node) {
+                neighbors = {}
+                neighbors['courseID'] = single_node
+                neighbors['children'] = ''
+                prereqs = list[single_node]
+
+                if (list[single_node]) {
+                    for (prereqs of list[single_node]) {
+                        //Ignore prerequisites with credits
+                        if (prereqs.includes('credits'))
+                            continue;
+
+
+                        prereqs = prereqs.replace(/[\[\]\(\)]/g, '').replace(/ or /g, ',');
+                        prereqs = prereqs.replace(/[1-9] of/g, '');
+                        prereqs = prereqs.trim()
+
+                        if (neighbors['children'] == '')
+                            neighbors['children'] = neighbors['children'] + (prereqs)
+                        else
+                            neighbors['children'] = neighbors['children'] + ',' + (prereqs)
+                    }
+                }
+
+
+                unique_prereqs = neighbors['children'].split(",").map(n => n.trim());
+
+                for (idv of unique_prereqs) {
+                    if (!newNodes.includes(idv)) {
+                        if (newNodes == '')
+                            newNodes = newNodes + idv
+                        else
+                            newNodes = newNodes + ',' + idv
+                    }
+
+                }
+
+
+
+
+                arr.push(neighbors)
+
+            }
+
+            tree.push(arr)
+
+
+
+            if (newNodes == '') {
+                return await tree
+            }
+            else return await createTree(newNodes, list, tree)
+
+
+        }
+
+
+
+        function dfs(graph, node) {
+            if (graph.hasOwnProperty(node)) {
+                let totalChildren = graph[node].length;
+
+                // Recursively explore each child node
+                for (const childNode of graph[node]) {
+                    if (childNode.includes("of")) {
+                        const regex = /(\d+)\s+of/;
+                        const match = childNode.match(regex);
+                        const extractedNumber = parseInt(match[1], 10);
+                        const or_courses = childNode.split("of")[1].split(",").map(c => c.trim());
+
+                        let min_course;
+                        let min_course_prereqs = 100000;
+                        for (const c of or_courses) {
+
+                            const reqs = dfs(graph, c);
+
+                            if (min_course_prereqs > reqs) {
+                                min_course_prereqs = reqs
+                                min_course = c;
+                            }
+                        }
+
+                        totalChildren += min_course_prereqs;
+                    } else {
+                        totalChildren += dfs(graph, childNode);
+                    }
+
+                }
+
+                return totalChildren;
+            } else {
+                // Node not found in the graph
+                return 0;
+            }
+        }
+
+
+        function bfsTraversal(graph, startCourse) {
+            const visited = new Set();
+            const queue = [startCourse];
+            let result = [];
+
+            while (queue.length > 0) {
+                let currentCourse = queue.shift();
+
+                if (!visited.has(currentCourse) && !currentCourse.includes("credits")) {
+                    visited.add(currentCourse);
+                    if (currentCourse.includes("of")) {
+                        const regex = /(\d+)\s+of/;
+                        const match = currentCourse.match(regex);
+                        const extractedNumber = parseInt(match[1], 10);
+                        const or_courses = currentCourse.split("of")[1].split(",").map(c => c.trim());
+
+                        let min_course;
+                        let min_course_prereqs = 100000;
+                        for (const c of or_courses) {
+                            const reqs = dfs(graph, c);
+                            if (min_course_prereqs > reqs) {
+                                min_course_prereqs = reqs
+                                min_course = c;
+                            }
+                        }
+                        result.push(min_course);
+                        currentCourse = min_course;
+
+
+
+                    } else {
+                        result.push(currentCourse);
+                    }
+                    for (const prerequisite of graph[currentCourse] || []) {
+                        queue.push(prerequisite);
+                    }
+                }
+            }
+
+            return result.reverse();
+        }
+
+
+
+        async function getOptimalPath(course) {
+            let list = {};
+
+            const treeList = await createTreeList(course, list);
+            const tree = cleanTree(treeList);
+            const path = bfsTraversal(tree, course);
+            return Promise.resolve(path);
+
+        }
+
+        // getOptimalPath("CIS*3760").then(path => {
+        //     console.log(path);
+        // });
+
+        function toggleButton(buttonId) {
+            const button = document.getElementById(buttonId);
+
+            if (button.textContent === "Collapse") {
+                button.textContent = "Expand";
+            } else if (button.textContent === "Expand") {
+                button.textContent = "Collapse";
+            }
+        }
+
+        function findCourses(string) {
+            document.getElementById("availableCoursesContainer").style.maxHeight =
+                null;
+            if (string == null || string == " " || string === "") {
+                prerequisites = {
+                    action: "availableCourses",
+                    body: "",
+                };
+            } else {
+                prerequisites = {
+                    action: "availableCourses",
+                    body: string,
+                };
+            }
+
+            availableCoursesDiv = document.getElementById("availableCourses");
+            availableCoursesDiv.innerHTML = "";
+            getCourseData(prerequisites).then(courses => {
+                if (courses !== undefined) {
+                    count = 0;
+                    for (const course of courses) {
+                        getCourseCode(course.courseID).then(courseData => {
+                            courseData = courseData[0];
+                            availableCoursesDiv.innerHTML += `
+                                          <div class="course">
+                                              <h2 class="courseTitle">${course.courseID}</h2>
+                                              <p class="courseDescription" style="font-weight:bold;">${courseData.credit}</p>
+                                              <p class="courseDescription">${courseData.description}</p>
+                                          </div>
+                                      `;
+                            count++;
+                            if (count == courses.length) {
+                                const elementDiv = document.getElementById(
+                                    "availableCoursesContainer"
+                                );
+                                elementDiv.style.maxHeight = "400px";
+                            }
+                        });
+                    }
+                } else {
+                    availableCoursesDiv.innerHTML += `
+                                          <div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h2 style="color:black;text-align:center;">There are no courses available! (NOTE: Make sure the course you are inputting are formatted correctly)</h2></div>
+                                      `;
+                    const elementDiv = document.getElementById(
+                        "availableCoursesContainer"
+                    );
+                    elementDiv.style.maxHeight = "400px";
+                }
+            });
+        }
+
+        function getSemesterCourses(searchQuery, subject) {
+            document.getElementById("semesterSearchContainer").style.maxHeight =
+                null;
+
+            availableSemester = {
+                action: "semesterCourses",
+                body: searchQuery,
+            };
+            semesterSearchDiv = document.getElementById("semesterSearch");
+            semesterSearchDiv.innerHTML = "";
+            getCourseData(availableSemester)
+                .then(data => {
+                    let courses;
+                    if (subject != "") {
+                        courses = data.filter(reg =>
+                            reg.startsWith(subject.toUpperCase())
+                        );
+                    } else {
+                        courses = data;
+                    }
+                    if (courses !== undefined) {
+                        count = 0;
+                        for (const course of courses) {
+                            getCourseCode(course).then(courseData => {
+                                courseData = courseData[0];
+                                semesterSearchDiv.innerHTML += `
+                                          <div class="course">
+                                              <h2 class="courseTitle">${course}</h2>
+                                              <p class="courseDescription" style="font-weight:bold;">${courseData.credit}</p>
+                                              <p class="courseDescription">${courseData.description}</p>
+                                          </div>
+                                      `;
+                                count++;
+                                if (count == courses.length) {
+                                    const elementDiv = document.getElementById(
+                                        "semesterSearchContainer"
+                                    );
+                                    elementDiv.style.maxHeight = "400px";
+                                }
+                            });
+                        }
+                    } else {
+                        semesterSearchDiv.innerHTML += `
+                                          <div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h2 style="color:black;text-align:center;">There are no courses available! (NOTE: Make sure the course you are inputting are formatted correctly)</h2></div>
+                                      `;
+                        const elementDiv = document.getElementById(
+                            "semesterSearchContainer"
+                        );
+                        elementDiv.style.maxHeight = "400px";
+                    }
+                })
+                .catch(error => {
+                    semesterSearchDiv.innerHTML += `
+                                          <div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h2 style="color:black;text-align:center;">There are no courses available! (NOTE: Make sure the course you are inputting are formatted correctly)</h2></div>
+                                      `;
+                    const elementDiv = document.getElementById(
+                        "semesterSearchContainer"
+                    );
+                    elementDiv.style.maxHeight = "400px";
+                });
+        }
+
+        async function getCourseCode(searchQuery) {
+            data = {
+                action: "getDescription",
+                body: searchQuery,
+            };
+
+            return await getCourseData(data);
+        }
+
+        async function getPrerequisites(searchQuery) {
+            data = {
+                action: "getPrerequisites",
+                body: searchQuery,
+            };
+
+            return await getCourseData(data);
+        }
+
+        // Function to make the API request and display results
+        async function getCourseData(apiRequestUrl) {
+            url = "https://cis3760f23-08.socs.uoguelph.ca/api";
+            data =
+                "action=" +
+                apiRequestUrl.action +
+                "&" +
+                apiRequestUrl.action +
+                "=" +
+                apiRequestUrl.body;
+
+            return await fetch(url, {
+                method: "POST",
+                body: data,
+            })
+                .then(response => response.json())
+                .catch(error => {
+                    console.log("Error fetching data:", error);
+                });
+        }
+
+        // Call the function to make the API request when the button is clicked
+
+        document
+            .getElementById("searchPrereqsButton")
+            .addEventListener("click", function () {
+                const searchQuery = document.getElementById("searchPrerqs").value;
+                const button = document.getElementById("availableCoursesButton");
+                button.textContent = "Collapse";
+                findCourses(searchQuery);
+            });
+        document.getElementById(
+            "availableCourses"
+        ).innerHTML = `<div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h2 style="text-align:center;color:black;">There are no courses to be displayed!</h2></div>`;
+        document
+            .getElementById("availableCoursesButton")
+            .addEventListener("click", () => {
+                // this.classList.toggle("active");
+                const elementDiv = document.getElementById(
+                    "availableCoursesContainer"
+                );
+                if (elementDiv.style.maxHeight) {
+                    elementDiv.style.maxHeight = null;
+                } else {
+                    elementDiv.style.maxHeight = "400px";
+                }
+            });
+        document
+            .getElementById("searchSemesterCollapseButton")
+            .addEventListener("click", () => {
+                // this.classList.toggle("active");
+                const elementDiv = document.getElementById(
+                    "semesterSearchContainer"
+                );
+                if (elementDiv.style.maxHeight) {
+                    elementDiv.style.maxHeight = null;
+                } else {
+                    elementDiv.style.maxHeight = "400px";
+                }
+            });
+
+        document
+            .getElementById("searchCourseCodeCollapseButton")
+            .addEventListener("click", () => {
+                // this.classList.toggle("active");
+                const elementDiv = document.getElementById(
+                    "searchCourseCodeContainer"
+                );
+                if (elementDiv.style.maxHeight) {
+                    elementDiv.style.maxHeight = null;
+                } else {
+                    elementDiv.style.maxHeight = "400px";
+                }
+            });
+
+        document
+            .getElementById("searchSemesterButton")
+            .addEventListener("click", function () {
+                const searchQuery = document.getElementById("searchSemester").value;
+                const searchSpecificSubject =
+                    document.getElementById("specificSubject").value;
+                getSemesterCourses(searchQuery, searchSpecificSubject);
+                const button = document.getElementById(
+                    "searchSemesterCollapseButton"
+                );
+                button.textContent = "Collapse";
+            });
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        document.getElementById("optimalPathButton").addEventListener("click", function () {
+            const course = document.getElementById("optimalPathInput").value;
+            getOptimalPath(course).then(path => {
+                displayOptimalPathResult(path);
+            });
+        });
+
+        async function displayOptimalPathResult(path) {
+            const optimalPathData = document.getElementById("optimalPathData");
+            optimalPathData.innerHTML = "";
+
+            if (path.length === 0) {
+                optimalPathData.innerHTML = `<div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h1 style="text-align:center;color:white;font-size: 3rem;">No optimal path found!</h1></div>`;
+            } else {
+                try {
+                    let allPrerequisites = "";
+
+                    for (let course of path) {
+                        course = course.replace(/\./g, '');
+                        const [courseData, prerequisites] = await Promise.all([getCourseCode(course), getPrerequisites(course)]);
+                        const prereqString = prerequisites && prerequisites.length ? prerequisites.map(prereq => prereq.prerequisite).join(', ') : "None";
+                        allPrerequisites += `
+                                <div class="searchCourseFlexContainer">
+                                    <div class="innerContainer1">
+                                        <h1 class="searchCourseTitle">${course}</h1>
+                                        <p class="searchCourseDescription">${courseData[0].description}</p>
+                                    </div>
+                                    <div class="innerContainer2">
+                                        <h2 class="searchCourseCredit">Credits: ${courseData[0].credit}</h2>
+                                        <h2 class="searchCourseCredit">Prerequisites: ${prereqString}</h2>
+                                        <h2 class="searchCourseCredit">Offering: ${courseData[0].semester}</h2>
+                                    </div>
+                                </div>
+                            `;
+                    }
+
+                    optimalPathData.innerHTML = allPrerequisites;
+
+                    const elementDiv = document.getElementById("optimalPathContainer");
+                    elementDiv.style.maxHeight = "400px";
+                    elementDiv.style.overflowY = "auto";
+                    elementDiv.style.backgroundColor = "#c20431";
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            }
+        }
+
+        document.getElementById("optimalPathCollapseButton").addEventListener("click", function () {
+            const elementDiv = document.getElementById("optimalPathContainer");
+
+            // Check if the container is currently expanded
+            if (elementDiv.style.maxHeight) {
+                elementDiv.style.maxHeight = null;
+                this.textContent = "Expand";
+            } else {
+                elementDiv.style.maxHeight = "400px";
+                this.textContent = "Collapse";
+            }
+        });
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        document
+            .getElementById("searchCourseCodeButton")
+            .addEventListener("click", () => {
+                const button = document.getElementById(
+                    "searchCourseCodeCollapseButton"
+                );
+                button.textContent = "Collapse";
+                document.getElementById(
+                    "searchCourseCodeContainer"
+                ).style.maxHeight = null;
+                document.getElementById("searchCourseCodeData").innerHTML = "";
+                courseCodeString = document.getElementById(
+                    "searchCourseCodeInput"
+                ).value;
+                getCourseCode(courseCodeString).then(data => {
+                    if (data && Object.keys(data).length) {
+                        let prerequisiteString = "";
+                        getPrerequisites(data[0].courseID)
+                            .then(prerequisites => {
+                                const array = [];
+                                for (prerequisite of prerequisites) {
+                                    array.push(prerequisite.prerequisite);
+                                }
+                                prerequisiteString = array.join(",");
+                                document.getElementById(
+                                    "searchCourseCodeData"
+                                ).innerHTML += `
+                                                <div class="searchCourseFlexContainer">
+                                                    <div class="innerContainer1">
+                                                        <h1 class="searchCourseTitle">${data[0].courseID}</h1>
+                                                        <p class="searchCourseDescription">${data[0].description}</p>
+                                                    </div>
+                                                    <div class="innerContainer2">
+                                                        <h2 class="searchCourseCredit">Credits: ${data[0].credit}</h2>
+                                                        <h2 class="searchCourseCredit">Prerequisites: ${prerequisiteString}</h2>
+                                                        <h2 class="searchCourseCredit">Offering: ${data[0].semester}</h2>
+                                                    </div>
+                                                </div>
+                                              `;
+                                const elementDiv = document.getElementById(
+                                    "searchCourseCodeContainer"
+                                );
+                                elementDiv.style.maxHeight = "400px";
+                            })
+                            .catch(error => {
+                                document.getElementById(
+                                    "searchCourseCodeData"
+                                ).innerHTML += `
+                                                <div class="searchCourseFlexContainer">
+                                                    <div class="innerContainer1">
+                                                        <h1 class="searchCourseTitle">${data[0].courseID}</h1>
+                                                        <p class="searchCourseDescription">${data[0].description}</p>
+                                                    </div>
+                                                    <div class="innerContainer2">
+                                                        <h2 class="searchCourseCredit">Credits: ${data[0].credit}</h2>
+                                                        <h2 class="searchCourseCredit">Prerequisites: None</h2>
+                                                        <h2 class="searchCourseCredit">Offering: ${data[0].semester}</h2>
+                                                    </div>
+                                                </div>
+                                              `;
+                                const elementDiv = document.getElementById(
+                                    "searchCourseCodeContainer"
+                                );
+                                elementDiv.style.maxHeight = "400px";
+                            });
+                    } else {
+                        document.getElementById(
+                            "searchCourseCodeData"
+                        ).innerHTML = `<div style="height:100%;width:100%;display:flex;justify-content:center;align-items:center;"><h1 style="text-align:center;color:white;font-size: 3rem;">Course not found!</h1></div>`;
+                        const elementDiv = document.getElementById(
+                            "searchCourseCodeContainer"
+                        );
+                        elementDiv.style.maxHeight = "400px";
+                    }
+                });
+            });
+    </script>
+</body>
+
+</html>
