@@ -1,0 +1,444 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Trebuchet MS", sans-serif;
+    color: #fdfdfd;
+    text-decoration: none;
+    max-width: 100%;
+    scroll-behavior: smooth;
+}
+
+header {
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6rem 0;
+    /* background-color: #c20431; */
+    height: 100px;
+    margin: 0 auto;
+    font-size: 1.5rem;
+    position: sticky;
+    top: 0;
+    transition: all 300ms ease-in-out;
+}
+
+hr {
+    margin: 0 auto;
+    width: 60%;
+}
+
+.navItems {
+    display: flex;
+    justify-content: center;
+    /* width: 30%; */
+    font-weight: bold;
+    height: 100%;
+}
+
+.navItems a {
+    text-align: center;
+    vertical-align: baseline;
+    height: 100%;
+    transition: all 150ms ease-in-out;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.navItems a:hover {
+    transform: translate(0, -5%) scale(103%, 103%);
+}
+.navbar {
+    display: none;
+    overflow: hidden;
+}
+
+.homepage {
+    z-index: 1;
+    position: relative;
+    margin-top: -100px;
+    height: 100vh;
+    background-image: url("../img/Guelph.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
+    text-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.homepageText {
+    font-size: 6em;
+    text-align: center;
+}
+
+.homepageSecondaryText {
+    font-size: 3em;
+}
+
+html {
+    scroll-padding-top: 100px; /* Replace with your fixed navbar height */
+    background-color: black;
+}
+
+.logo {
+    height: 50%;
+}
+
+#slogan1 {
+    background-color: black;
+}
+
+#slogan2 {
+    background-color: #c20431;
+}
+
+.slogan {
+    padding: 10% 0 10%;
+    width: 80%;
+    margin: 0 auto;
+    display: grid;
+    background-color: inherit;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 50px;
+    place-items: center;
+}
+
+.sloganText {
+    font-size: 6rem;
+    grid-column: 1 / 4;
+}
+
+.sloganText2 {
+    text-align: end;
+    font-size: 4.5rem;
+    grid-column: 3 / 6;
+}
+
+.slogan1Image {
+    grid-column: 4 / 6;
+}
+
+.slogan2Image {
+    grid-column: 1 / 3;
+}
+
+section {
+    padding: 0 10% 0;
+}
+
+.sectionHeader {
+    padding: 40px 0 0px;
+    width: 100%;
+}
+
+.mainHeading {
+    font-size: 4em;
+    text-align: center;
+}
+
+.subHeading {
+    font-size: 2.5em;
+    padding-bottom: 0.5em;
+    text-align: center;
+}
+
+.subSubHeading {
+    font-size: 2em;
+    text-align: center;
+}
+
+.textContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3em;
+    text-align: center;
+    padding: 1em 10px;
+}
+
+.textContainer p {
+    max-width: 60%;
+}
+
+.listContent {
+    max-width: 50%;
+    font-size: 1.3em;
+}
+
+.imageContainer {
+    width: 100%;
+    margin: 2em 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.contentImage {
+    width: 55%;
+}
+
+.contentImage2 {
+    width: 30%;
+}
+
+.descriptionSections {
+    padding: 3em 0 3em;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+#download {
+    /* padding: 2em 0; */
+    background-color: #c20431;
+    font-size: 4em;
+}
+
+.downloadText {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: left;
+    margin: 1em 0;
+    grid-column: 1 / 4;
+}
+
+.button {
+    background-color: black;
+    border: none;
+    color: white;
+    height: 10em;
+    width: 25em;
+    cursor: pointer;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    transition: all 150ms ease-in-out;
+}
+
+.button:hover {
+    background-color: #373737;
+    padding: 15px 0;
+}
+
+.downloadIcon {
+    height: 60%;
+}
+
+.downloadImage {
+    grid-column: 4 / 6;
+    height: 100%;
+}
+
+#about {
+    background-color: #c20431;
+}
+
+.aboutContainer {
+    padding: 4em 0 8em;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.teamMembersContainer {
+    margin-top: 2em;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-column-gap: 2em;
+}
+
+.teamMember {
+    margin: 0 auto;
+    background-color: black;
+    margin: 1em 0;
+    min-height: 30em;
+    padding: 2em;
+    border-radius: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.name {
+    font-size: 2em;
+}
+
+.name:hover {
+    color: #c4c4c4; /* Change the color to red on hover */
+}
+
+#diceFormButton {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #303030;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#diceFormButton:hover {
+    background-color: #535353;
+}
+#diceResult {
+    margin: 15px;
+}
+#rawhi-desc {
+    margin: 15px;
+}
+#rollDice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.diceFormButton {
+    color: black;
+}
+
+.shuangFormButton {
+    color: black;
+}
+
+.colorRect {
+    margin: 10px;
+    height: 100px;
+    width: 100px;
+    background-color: white;
+    border-radius: 10px;
+}
+
+@media screen and (max-width: 1680px) {
+    body {
+        width: 100vw;
+    }
+    .navItems {
+        display: none;
+        overflow: hidden;
+    }
+    .navbar {
+        display: inline-block;
+        overflow: hidden;
+        font-weight: bold;
+        max-width: 300px;
+        height: 800px;
+    }
+
+    #menu__toggle {
+        opacity: 0;
+    }
+    #menu__toggle:checked + .menu__btn > span {
+        transform: rotate(45deg);
+    }
+    #menu__toggle:checked + .menu__btn > span::before {
+        top: 0;
+        transform: rotate(0deg);
+    }
+    #menu__toggle:checked + .menu__btn > span::after {
+        top: 0;
+        transform: rotate(90deg);
+    }
+    #menu__toggle:checked ~ .menu__box {
+        left: 0 !important;
+    }
+    .menu__btn {
+        position: absolute;
+        top: 58px;
+        right: 40px;
+        transform: scale(2);
+        width: 26px;
+        font-weight: bold;
+        height: 26px;
+        cursor: pointer;
+        z-index: 10;
+    }
+    .menu__btn > span,
+    .menu__btn > span::before,
+    .menu__btn > span::after {
+        display: block;
+        font-weight: bold;
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background-color: #ffffff;
+        transition-duration: 0.25s;
+    }
+    .menu__btn > span::before {
+        content: "";
+        top: -8px;
+    }
+    .menu__btn > span::after {
+        content: "";
+        top: 8px;
+    }
+    .menu__box {
+        display: flex;
+        flex-direction: column; /* Assuming you want a column layout */
+        justify-content: flex-start; /* Align content to the top/right */
+        position: fixed;
+        top: 0px;
+        right: 105%; /* Start off-screen to the right */
+        width: 420px;
+        height: 100%;
+        list-style: none;
+        background-color: rgba(52, 52, 52, 0.7);
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+        transition-duration: 0.25s;
+    }
+    .menu__item {
+        display: block;
+        padding: 12px 24px;
+        position: relative;
+        color: #ffffff;
+        font-size: 40px;
+        font-weight: 600;
+        text-decoration: none;
+        transition-duration: 0.25s;
+    }
+    .menu__item:hover {
+        background-color: #cfd8dc;
+    }
+
+    .sloganText {
+        font-size: 4rem;
+        grid-column: 1 / 4;
+    }
+
+    .sloganText2 {
+        font-size: 4arem;
+    }
+
+    .slogan {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .slogan1Image {
+        height: 350px;
+        width: auto;
+    }
+
+    .slogan2Image {
+        height: 350px;
+        width: auto;
+    }
+
+    .sloganText {
+        text-align: center;
+        width: 70%;
+    }
+    .sloganText2 {
+        text-align: center;
+        width: 70%;
+    }
+}

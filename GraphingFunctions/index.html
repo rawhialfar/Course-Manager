@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Prerequisites Graph</title>
+  <style>
+    #mynetwork {
+      width: 600px;
+      height: 400px;
+      border: 1px solid lightgray;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+</head>
+<body>
+  <div id="mynetwork"></div>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+  <script src="edges.js"></script>
+  <script>
+    // Example course list and nodes
+    const courseList = {
+      "CIS*3760": ["CIS*2750,CIS*3750"],
+      "CIS*2750": ["(CIS*2430 or ENGG*1420)", "CIS*2520", "CIS*2000"],
+      "CIS*3750": ["(CIS*2430 or ENGG*1420)", "9.00 credits", "CIS*2520"],
+      "CIS*2520": ["(1 of CIS*1910, ENGG*1500, MATH*2000)", "(CIS*2500 or ENGG*1420)"]
+    };
+
+    const nodes = [
+      { id: 3760, label: 'CIS*3760' },
+      { id: 2750, label: 'CIS*2750' },
+      { id: 2430, label: 'CIS*2430' },
+      { id: 1420, label: 'ENGG*1420' },
+      { id: 2520, label: 'CIS*2520' },
+      { id: 3750, label: 'CIS*3750' },
+      { id: 1910, label: 'CIS*1910' },
+      { id: 1500, label: 'ENGG*1500' },
+      { id: 2000, label: 'CIS*2000' },
+      { id: 2001, label: 'MATH*2000' },
+      { id: 2500, label: 'CIS*2500' }
+    ];
+
+    // Call the function to generate edges
+    const edges = generateEdges(courseList, nodes);
+
+    const container = document.getElementById('mynetwork');
+    const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+    const options = {};
+    const network = new vis.Network(container, data, options);
+  </script>
+</body>
+</html>
